@@ -1,6 +1,8 @@
 """Implements the core evolution algorithm."""
 from __future__ import print_function
 
+import numpy as np
+
 from neat.math_util import mean
 from neat.reporting import ReporterSet
 
@@ -55,7 +57,7 @@ class Population(object):
     def remove_reporter(self, reporter):
         self.reporters.remove(reporter)
 
-    def run(self, fitness_function, n=None):
+    def run(self, fitness_function, constraint_function=None, n=None):
         """
         Runs NEAT's genetic algorithm for at most n generations.  If n
         is None, run until solution is found or extinction occurs.
@@ -83,6 +85,26 @@ class Population(object):
             k += 1
 
             self.reporters.start_generation(self.generation)
+
+            # Evaluate all genomes using the user-provided constraint function.
+            # If some genomes violate the constraint, generate new genomes and replace them, until all genomes satisfy the constraint.
+            if constraint_function is not None:
+                genomes = list(self.population.items())
+                validity = constraint_function(genomes, self.config)
+                if not all(validity):
+                    valid_idx = np.where(validity)[0]
+                    valid_genomes = np.array(genomes)[valid_idx]
+                    while len(valid_genomes) < self.config.pop_size:
+                        new_population = self.reproduction.create_new(self.config.genome_type,
+                                                                    self.config.genome_config,
+                                                                    self.config.pop_size)
+                        new_genomes = list(new_population.items())
+                        validity = constraint_function(new_genomes, self.config)
+                        valid_idx = np.where(validity)[0]
+                        valid_genomes = np.vstack([valid_genomes, np.array(new_genomes)[valid_idx]])
+                    valid_genomes = valid_genomes[:self.config.pop_size]
+                    self.population = dict(valid_genomes)
+                    self.species.speciate(self.config, self.population, self.generation)
 
             # Evaluate all genomes using the user-provided function.
             fitness_function(list(self.population.items()), self.config)
