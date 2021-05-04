@@ -2,7 +2,20 @@
 Runs evaluation functions in parallel subprocesses
 in order to evaluate multiple genomes at once.
 """
-from multiprocessing import Pool
+import multiprocessing as mp
+
+class NoDaemonProcess(mp.Process):
+    # make 'daemon' attribute always return False
+    def _get_daemon(self):
+        return False
+    def _set_daemon(self, value):
+        pass
+    daemon = property(_get_daemon, _set_daemon)
+
+# We sub-class multiprocessing.pool.Pool instead of multiprocessing.Pool
+# because the latter is only a wrapper function, not a proper class.
+class Pool(mp.pool.Pool):
+    Process = NoDaemonProcess
 
 
 class ParallelEvaluator(object):
