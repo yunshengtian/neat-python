@@ -90,7 +90,7 @@ class Population(object):
             # If some genomes violate the constraint, generate new genomes and replace them, until all genomes satisfy the constraint.
             if constraint_function is not None:
                 genomes = list(self.population.items())
-                validity = constraint_function(genomes, self.config)
+                validity = constraint_function(genomes, self.config, self.generation)
                 if not all(validity):
                     valid_idx = np.where(validity)[0]
                     valid_genomes = np.array(genomes)[valid_idx]
@@ -99,7 +99,7 @@ class Population(object):
                                                                     self.config.genome_config,
                                                                     self.config.pop_size)
                         new_genomes = list(new_population.items())
-                        validity = constraint_function(new_genomes, self.config)
+                        validity = constraint_function(new_genomes, self.config, self.generation)
                         valid_idx = np.where(validity)[0]
                         valid_genomes = np.vstack([valid_genomes, np.array(new_genomes)[valid_idx]])
                     valid_genomes = valid_genomes[:self.config.pop_size]
@@ -107,7 +107,7 @@ class Population(object):
                     self.species.speciate(self.config, self.population, self.generation)
 
             # Evaluate all genomes using the user-provided function.
-            fitness_function(list(self.population.items()), self.config)
+            fitness_function(list(self.population.items()), self.config, self.generation)
 
             # Gather and report statistics.
             best = None

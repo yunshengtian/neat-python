@@ -25,22 +25,22 @@ class ParallelEvaluator(object):
         self.pool.close() # should this be terminate?
         self.pool.join()
 
-    def evaluate_fitness(self, genomes, config):
+    def evaluate_fitness(self, genomes, config, generation):
         jobs = []
-        for ignored_genome_id, genome in genomes:
-            jobs.append(self.pool.apply_async(self.fitness_function, (genome, config)))
+        for genome_id, genome in genomes:
+            jobs.append(self.pool.apply_async(self.fitness_function, (genome, config, genome_id, generation)))
 
         # assign the fitness back to each genome
-        for job, (ignored_genome_id, genome) in zip(jobs, genomes):
+        for job, (genome_id, genome) in zip(jobs, genomes):
             genome.fitness = job.get(timeout=self.timeout)
 
-    def evaluate_constraint(self, genomes, config):
+    def evaluate_constraint(self, genomes, config, generation):
         jobs = []
-        for ignored_genome_id, genome in genomes:
-            jobs.append(self.pool.apply_async(self.constraint_function, (genome, config)))
+        for genome_id, genome in genomes:
+            jobs.append(self.pool.apply_async(self.constraint_function, (genome, config, genome_id, generation)))
 
         # return the validity of each genome
         validity = []
-        for job, (ignored_genome_id, genome) in zip(jobs, genomes):
+        for job, (genome_id, genome) in zip(jobs, genomes):
             validity.append(job.get(timeout=self.timeout))
         return validity
