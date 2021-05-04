@@ -133,7 +133,7 @@ class Config(object):
                 ConfigParameter('reset_on_extinction', bool),
                 ConfigParameter('no_fitness_termination', bool, False)]
 
-    def __init__(self, genome_type, reproduction_type, species_set_type, stagnation_type, filename, extra_info=None):
+    def __init__(self, genome_type, reproduction_type, species_set_type, stagnation_type, filename, extra_info=None, custom_config=None):
         # Check that the provided types have the required methods.
         assert hasattr(genome_type, 'parse_config')
         assert hasattr(reproduction_type, 'parse_config')
@@ -156,6 +156,13 @@ class Config(object):
                 parameters.read_file(f)
             else:
                 parameters.readfp(f)
+        
+        if custom_config is not None:
+            # [(section, key, value), ...]
+            for cfg in custom_config:
+                assert len(cfg) == 3, 'Invalid custom config input'
+                section, key, value = cfg
+                parameters[section][key] = str(value)
 
         # NEAT configuration
         if not parameters.has_section('NEAT'):
