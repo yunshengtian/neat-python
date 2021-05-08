@@ -48,12 +48,8 @@ class ParallelEvaluator(object):
             genome.fitness = job.get(timeout=self.timeout)
 
     def evaluate_constraint(self, genomes, config, generation):
-        jobs = []
+        validity_all = []
         for genome_id, genome in genomes:
-            jobs.append(self.pool.apply_async(self.constraint_function, (genome, config, genome_id, generation)))
-
-        # return the validity of each genome
-        validity = []
-        for job, (genome_id, genome) in zip(jobs, genomes):
-            validity.append(job.get(timeout=self.timeout))
-        return validity
+            validity = self.constraint_function(genome, config, genome_id, generation)
+            validity_all.append(validity)
+        return validity_all
