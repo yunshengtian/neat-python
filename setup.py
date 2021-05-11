@@ -7,7 +7,7 @@ setup(
     author_email='nobody@nowhere.com',
     maintainer='CodeReclaimers, LLC',
     maintainer_email='alan@codereclaimers.com',
-    url='https://github.com/CodeReclaimers/neat-python',
+    url='https://github.com/yunshengtian/neat-python',
     license="BSD",
     description='A NEAT (NeuroEvolution of Augmenting Topologies) implementation',
     long_description='Python implementation of NEAT (NeuroEvolution of Augmenting Topologies), a method ' +
